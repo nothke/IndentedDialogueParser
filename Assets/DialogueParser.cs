@@ -12,20 +12,17 @@ public class DialogueNode
 
 public class DialogueParser : MonoBehaviour
 {
-    DialogueNode[] nodes;
+    List<DialogueNode> nodes = new List<DialogueNode>();
 
     public string fileName;
 
-    void Start()
-    {
-        Parse();
-    }
-
-    void Parse()
+    public void Parse()
     {
         string[] lines = File.ReadAllLines(fileName);
 
         List<string> dialines = new List<string>();
+
+        Dictionary<int, List<string>> tabbedDict = new Dictionary<int, List<string>>();
 
         foreach (var line in lines)
         {
@@ -34,21 +31,46 @@ public class DialogueParser : MonoBehaviour
             for (int i = 0; i < line.Length; i++)
             {
                 if (line[i] == '\t') tabNum++;
-                else if (line[i] == '-')
+                else
                 {
-                    dialines.Add(line.Substring(i + 1).Trim());
-                    break;
+                    if (line[i] == '-') // if line starts with - it's a dialogue line
+                    {
+                        // manage dict
+                        List<string> tabLines;
+
+                        if (tabbedDict.ContainsKey(tabNum))
+                            tabLines = tabbedDict[tabNum];
+                        else
+                        {
+                            tabLines = new List<string>();
+                            tabbedDict.Add(tabNum, tabLines);
+                        }
+
+                        // add
+                        tabLines.Add(line.Substring(i + 1).Trim());
+                        break;
+                    }
                 }
-                else break;
+            }
+        }
+
+        foreach (var pair in tabbedDict)
+        {
+            DialogueNode node = new DialogueNode();
+            node.answer = pair.Value[0];
+
+            if (pair.Value.Count > 1)
+            {
+                node.choices = pair.Value.ToArray();
+                //node.choices = new string[pair.Value.Count - 2];
             }
 
-            Debug.Log(tabNum);
+            nodes.Add(node);
         }
 
-        foreach (var line in dialines)
+        foreach (var node in nodes)
         {
-            Debug.Log(line);
+            Debug.Log(node.answer);
         }
-
     }
 }
