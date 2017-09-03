@@ -3,74 +3,123 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
+using System.Linq;
+
 public class DialogueNode
 {
     public string answer;
     public string[] choices;
-    public int[] links;
+    public DialogueNode[] links;
 }
+
 
 public class DialogueParser : MonoBehaviour
 {
+    struct TabLine
+    {
+        public string text;
+        public int line;
+        public int parent;
+        public int indent;
+
+        public List<int> links;
+
+        public TabLine(string text, int line, int indent, int parent)
+        {
+            this.text = text;
+            this.line = line;
+            this.indent = indent;
+            this.parent = parent;
+
+            links = new List<int>();
+        }
+    }
+
+    List<TabLine> tabLines = new List<TabLine>();
+
     List<DialogueNode> nodes = new List<DialogueNode>();
 
     public string fileName;
+
+    public DialogueNode GetFirstNode()
+    {
+        return nodes[0];
+    }
 
     public void Parse()
     {
         string[] lines = File.ReadAllLines(fileName);
 
-        List<string> dialines = new List<string>();
+        List<string> diaLines = new List<string>();
 
-        Dictionary<int, List<string>> tabbedDict = new Dictionary<int, List<string>>();
+        //Dictionary<int, List<string>> tabbedDict = new Dictionary<int, List<string>>();
 
-        foreach (var line in lines)
+        // isolate only dialogue lines
+
+        for (int ln = 0; ln < lines.Length; ln++)
         {
-            // find number of tabs preceeding line
-            int tabNum = 0;
-            for (int i = 0; i < line.Length; i++)
+            string line = lines[ln];
+
+            int indent = 0;
+            int li = 0; // line index
+
+            for (int ci = 0; ci < line.Length; ci++)
             {
-                if (line[i] == '\t') tabNum++;
+                if (line[ci] == '\t') indent++;
                 else
                 {
-                    if (line[i] == '-') // if line starts with - it's a dialogue line
+                    if (line[ci] == '-') // if line starts with - it's a dialogue line
                     {
-                        // manage dict
-                        List<string> tabLines;
+                        li++; // increment index by one
 
-                        if (tabbedDict.ContainsKey(tabNum))
-                            tabLines = tabbedDict[tabNum];
-                        else
+                        string text = line.Substring(ci + 1).Trim();
+                        TabLine tabLine = new TabLine(text, li, indent, 0);
+
+                        if (indent != 0) // if no indent, it's root
                         {
-                            tabLines = new List<string>();
-                            tabbedDict.Add(tabNum, tabLines);
+                            // otherwise look up for the parent
+                            for (int i = tabLines.Count - 1; i >= 0; i--) // replace with li?
+                            {
+                                if (tabLines[i].indent == indent - 1)
+                                {
+                                    // add a parent
+                                    tabLine.parent = tabLines[i].line;
+
+                                    // add this as a child to a parent
+                                    tabLines[i].links.Add(li);
+
+                                    break;
+                                }
+                            }
                         }
 
-                        // add
-                        tabLines.Add(line.Substring(i + 1).Trim());
+                        tabLines.Add(tabLine);
+
                         break;
                     }
                 }
             }
         }
 
-        foreach (var pair in tabbedDict)
+        // go through each tabline and make a node
+        for (int tli = 0; tli < tabLines.Count; tli++)
         {
+            int ln = tabLines[tli].line;
+
+            // find all that link to it
+            List<int> linkedLines = tabLines[tli].links;
+
+            List<TabLine> linkedTabLines = new List<TabLine>();
+
+            // find all links by line
+            for (int ltli = 0; ltli < linkedLines.Count; ltli++)
+                linkedTabLines.Add(tabLines[linkedLines[ltli]]);
+
+            string[] linkedTexts = linkedTabLines.Select(x => x.text).ToArray();
+
             DialogueNode node = new DialogueNode();
-            node.answer = pair.Value[0];
-
-            if (pair.Value.Count > 1)
-            {
-                node.choices = pair.Value.ToArray();
-                //node.choices = new string[pair.Value.Count - 2];
-            }
-
-            nodes.Add(node);
-        }
-
-        foreach (var node in nodes)
-        {
-            Debug.Log(node.answer);
+            node.choices = linkedTexts;
+            //node.links = linkedLinks;
         }
     }
 }
