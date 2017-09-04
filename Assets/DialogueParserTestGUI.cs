@@ -11,10 +11,12 @@ public class DialogueParserTestGUI : MonoBehaviour
     void Start()
     {
         dialogueParser.Parse();
-        currentNode = dialogueParser.GetFirstNode();
+        ResetRoot();
     }
 
     Rect rect = new Rect(100, 100, 400, 400);
+
+    public const string TREE_NAME = "TEST 2";
 
     private void OnGUI()
     {
@@ -23,13 +25,18 @@ public class DialogueParserTestGUI : MonoBehaviour
 
     DialogueNode currentNode;
 
+    void ResetRoot()
+    {
+        currentNode = dialogueParser.trees[TREE_NAME].GetFirstNode();
+    }
+
     void Window(int id)
     {
         if (currentNode == null)
         {
             GUILayout.Label("Dialogue ended");
             if (GUILayout.Button("Restart"))
-                currentNode = dialogueParser.GetFirstNode();
+                ResetRoot();
 
             return;
         }
@@ -40,7 +47,7 @@ public class DialogueParserTestGUI : MonoBehaviour
         if (currentNode.choices == null || currentNode.choices.Length == 0)
         {
             if (GUILayout.Button("Dialogue Ended. Restart"))
-                currentNode = dialogueParser.GetFirstNode();
+                ResetRoot();
 
             return;
         }
@@ -53,7 +60,7 @@ public class DialogueParserTestGUI : MonoBehaviour
         {
             if (GUILayout.Button(currentNode.choices[i]))
             {
-                currentNode = dialogueParser.trees["TEST 1"].GetNext(currentNode, i);
+                currentNode = dialogueParser.trees[TREE_NAME].GetNext(currentNode, i);
                 //currentNode = dialogueParser.GetNext(currentNode, i);
                 break;
             }

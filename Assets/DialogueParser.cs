@@ -9,6 +9,7 @@ namespace IndentedDialogue
 {
     public class DialogueTree
     {
+        public DialogueNode rootNode;
         public Dictionary<int, DialogueNode> nodes = new Dictionary<int, DialogueNode>();
 
         /// <summary>
@@ -25,6 +26,11 @@ namespace IndentedDialogue
 
             Debug.Log("Fetching line " + link);
             return nodes[link];
+        }
+
+        public DialogueNode GetFirstNode()
+        {
+            return rootNode;
         }
     }
 
@@ -79,17 +85,11 @@ namespace IndentedDialogue
             }
         }
 
-        List<TabLine> tabLines = new List<TabLine>();
-
-
-        DialogueNode rootNode;
+        //List<TabLine> tabLines = new List<TabLine>();
 
         public string fileName;
 
-        public DialogueNode GetFirstNode()
-        {
-            return rootNode;
-        }
+
 
         public void Parse()
         {
@@ -97,7 +97,9 @@ namespace IndentedDialogue
 
             int li = 0; // line index
 
-            DialogueTree currentTree = null;
+            Dictionary<string, List<TabLine>> tabLinesDict = new Dictionary<string, List<TabLine>>();
+
+            List<TabLine> tabLines = new List<TabLine>();
 
             for (int ln = 0; ln < lines.Length; ln++)
             {
@@ -116,11 +118,19 @@ namespace IndentedDialogue
 
                         if (lineIsTreeInitializer)
                         {
-                            tabLines.Clear();
-
                             string name = line.Substring(ci + 1).Trim();
-                            currentTree = new DialogueTree();
-                            trees.Add(name, currentTree);
+
+                            tabLines = new List<TabLine>();
+
+                            if (tabLinesDict.ContainsKey(name))
+                            {
+                                Error(string.Format("Found more than one trees called '{0}', this is not allowed", name));
+                                return;
+                            }
+
+                            tabLinesDict.Add(name, tabLines);
+                            li = 0;
+
                             break;
                         }
 
@@ -156,41 +166,61 @@ namespace IndentedDialogue
                 }
             }
 
-            for (int i = 0; i < tabLines.Count; i++)
+            foreach (var pair in tabLinesDict)
             {
-                Debug.Log(tabLines[i].ToString());
-            }
+                var debugTabLines = pair.Value;
 
-            // Create all nodes as dictionary entries linked by 'line' number
-            for (int tli = 0; tli < tabLines.Count; tli++)
-            {
-                if (tabLines[tli].isPrompt)
+                foreach (var tabLine in debugTabLines)
                 {
-                    DialogueNode node = new DialogueNode();
-                    node.prompt = tabLines[tli].text;
-                    node.links = tabLines[tli].links.ToArray();
-
-                    int linkCount = tabLines[tli].links.Count;
-
-                    node.links = new int[linkCount];
-                    node.choices = new string[linkCount];
-
-                    for (int i = 0; i < linkCount; i++)
-                    {
-                        int tabLineIndex = tabLines[tli].links[i];
-                        node.links[i] = tabLineIndex + 1;
-                        node.choices[i] = tabLines[tabLineIndex].text;
-                    }
-
-                    currentTree.nodes.Add(tabLines[tli].lineIndex, node);
-
-                    if (tabLines[tli].indent == 0)
-                        rootNode = node;
+                    Debug.Log(pair.Key + " || " + tabLine.ToString());
                 }
             }
 
-            tabLines.Clear();
-            tabLines = null;
+            DialogueTree currentTree = null;
+
+            Debug.Log("Num of trees: " + tabLinesDict.Count);
+
+            foreach (var pair in tabLinesDict)
+            {
+                tabLines = pair.Value;
+
+                currentTree = new DialogueTree();
+                trees.Add(pair.Key, currentTree);
+
+                // Create all nodes as dictionary entries linked by 'line' number
+                for (int tli = 0; tli < tabLines.Count; tli++)
+                {
+                    if (tabLines[tli].isPrompt)
+                    {
+                        DialogueNode node = new DialogueNode();
+                        node.prompt = tabLines[tli].text;
+
+                        // Choices
+                        int linkCount = tabLines[tli].links.Count;
+
+                        node.links = new int[linkCount];
+                        node.choices = new string[linkCount];
+
+                        for (int i = 0; i < linkCount; i++)
+                        {
+                            int tabLineIndex = tabLines[tli].links[i];
+                            node.links[i] = tabLineIndex + 1;
+                            Debug.Assert(tabLineIndex < tabLines.Count, "tablineIndex is out of range");
+                            node.choices[i] = tabLines[tabLineIndex].text;
+                        }
+
+                        currentTree.nodes.Add(tabLines[tli].lineIndex, node);
+
+                        if (tabLines[tli].indent == 0)
+                            currentTree.rootNode = node;
+                    }
+                }
+            }
+        }
+
+        void Error(string message)
+        {
+            Debug.LogError("IDP: Parsing unsuccessful: " + message);
         }
     }
 }
