@@ -53,7 +53,8 @@ public class DialogueParserTestGUI : MonoBehaviour
         {
             if (GUILayout.Button(currentNode.choices[i]))
             {
-                currentNode = dialogueParser.GetNext(currentNode, i);
+                currentNode = dialogueParser.trees["TEST 1"].GetNext(currentNode, i);
+                //currentNode = dialogueParser.GetNext(currentNode, i);
                 break;
             }
         }

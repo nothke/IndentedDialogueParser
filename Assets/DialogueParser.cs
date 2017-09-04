@@ -7,6 +7,27 @@ using System.Linq;
 
 namespace IndentedDialogue
 {
+    public class DialogueTree
+    {
+        public Dictionary<int, DialogueNode> nodes = new Dictionary<int, DialogueNode>();
+
+        /// <summary>
+        /// Gets the next dialogue node. Returns null when it's the end.
+        /// </summary>
+        /// <param name="current">The node you are currently on</param>
+        /// <param name="choice">The index of choice</param>
+        public DialogueNode GetNext(DialogueNode current, int choice)
+        {
+            int link = current.links[choice];
+
+            if (link == -1) return null; // Dialogue ends
+            if (!nodes.ContainsKey(link)) return null;
+
+            Debug.Log("Fetching line " + link);
+            return nodes[link];
+        }
+    }
+
     public class DialogueNode
     {
         public string prompt;
@@ -17,6 +38,8 @@ namespace IndentedDialogue
 
     public class DialogueParser : MonoBehaviour
     {
+        public Dictionary<string, DialogueTree> trees = new Dictionary<string, DialogueTree>();
+
         struct TabLine
         {
             public bool isPrompt;
@@ -58,7 +81,7 @@ namespace IndentedDialogue
 
         List<TabLine> tabLines = new List<TabLine>();
 
-        Dictionary<int, DialogueNode> nodes = new Dictionary<int, DialogueNode>();
+
         DialogueNode rootNode;
 
         public string fileName;
@@ -74,6 +97,8 @@ namespace IndentedDialogue
 
             int li = 0; // line index
 
+            DialogueTree currentTree = null;
+
             for (int ln = 0; ln < lines.Length; ln++)
             {
                 string line = lines[ln];
@@ -85,8 +110,19 @@ namespace IndentedDialogue
                     if (line[ci] == '\t') indent++; // count indent
                     else
                     {
+                        bool lineIsTreeInitializer = line[ci] == '#';
                         bool lineIsPrompt = line[ci] == '-';
                         bool lineIsChoice = line[ci] == '*';
+
+                        if (lineIsTreeInitializer)
+                        {
+                            tabLines.Clear();
+
+                            string name = line.Substring(ci + 1).Trim();
+                            currentTree = new DialogueTree();
+                            trees.Add(name, currentTree);
+                            break;
+                        }
 
                         if (lineIsPrompt || lineIsChoice)
                         {
@@ -146,7 +182,7 @@ namespace IndentedDialogue
                         node.choices[i] = tabLines[tabLineIndex].text;
                     }
 
-                    nodes.Add(tabLines[tli].lineIndex, node);
+                    currentTree.nodes.Add(tabLines[tli].lineIndex, node);
 
                     if (tabLines[tli].indent == 0)
                         rootNode = node;
@@ -155,22 +191,6 @@ namespace IndentedDialogue
 
             tabLines.Clear();
             tabLines = null;
-        }
-
-        /// <summary>
-        /// Gets the next dialogue node. Returns null when it's the end.
-        /// </summary>
-        /// <param name="current">The node you are currently on</param>
-        /// <param name="choice">The index of choice</param>
-        public DialogueNode GetNext(DialogueNode current, int choice)
-        {
-            int link = current.links[choice];
-
-            if (link == -1) return null; // Dialogue ends
-            if (!nodes.ContainsKey(link)) return null;
-
-            Debug.Log("Fetching line " + link);
-            return nodes[link];
         }
     }
 }
