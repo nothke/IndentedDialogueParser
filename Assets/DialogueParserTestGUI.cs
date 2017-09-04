@@ -16,7 +16,7 @@ public class DialogueParserTestGUI : MonoBehaviour
 
     Rect rect = new Rect(100, 100, 400, 400);
 
-    public const string TREE_NAME = "TEST 2";
+    public const string TREE_NAME = "TEST 1";
 
     private void OnGUI()
     {

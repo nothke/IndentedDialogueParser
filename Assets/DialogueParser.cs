@@ -24,7 +24,7 @@ namespace IndentedDialogue
             if (link == -1) return null; // Dialogue ends
             if (!nodes.ContainsKey(link)) return null;
 
-            Debug.Log("Fetching line " + link);
+            //Debug.Log("Fetching line " + link);
             return nodes[link];
         }
 
