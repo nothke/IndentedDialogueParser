@@ -155,9 +155,19 @@ public class DialogueParser : MonoBehaviour
         tabLines = null;
     }
 
+    /// <summary>
+    /// Gets the next dialogue node. Returns null when it's the end.
+    /// </summary>
+    /// <param name="current">The node you are currently on</param>
+    /// <param name="choice">The index of choice</param>
     public DialogueNode GetNext(DialogueNode current, int choice)
     {
-        Debug.Log("Fetching line " + current.links[choice]);
-        return nodes[current.links[choice]];
+        int link = current.links[choice];
+
+        if (link == -1) return null; // Dialogue ends
+        if (!nodes.ContainsKey(link)) return null;
+
+        Debug.Log("Fetching line " + link);
+        return nodes[link];
     }
 }
