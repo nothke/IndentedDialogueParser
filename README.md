@@ -33,3 +33,12 @@ When writing dialogues for games, I would often write them first into one text f
 - Reusing parts, links to trees
 - Tags for adding features such as requirement checking, randomization, or events. They currently need to be implemented by the user
 - Syntax highlighter for sublime
+
+## Syntax
+```// This is a comment
+# THIS IS A TREE  // The name of this dialogue tree, preceeded by '#', you can get it with trees["THIS IS A TREE"]
+- Hi! // A prompt, preceeded by '-', this is a root node as it is the first
+  * Oh, hi! // A choice is preceeded by '*', prompts and choices cannot be on the same indentation!
+  * Well, hello!! // Another choice
+    - Well, well, well... Hello! // The answer to the second choice..
+    // You can see other examples in the project```
