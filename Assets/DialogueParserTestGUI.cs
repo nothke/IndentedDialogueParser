@@ -24,6 +24,12 @@ public class DialogueParserTestGUI : MonoBehaviour
 
     void Window(int id)
     {
-        GUILayout.Label(currentNode.answer);
+        GUILayout.Label(currentNode.prompt);
+
+        for (int i = 0; i < currentNode.choices.Length; i++)
+        {
+            if (GUILayout.Button(currentNode.choices[i]))
+                currentNode = dialogueParser.GetNext(currentNode, i);
+        }
     }
 }

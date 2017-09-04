@@ -304,7 +304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95cabbe31b92c10458a3861a89155a70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileName: dialogue.idp
+  fileName: multianswer2.idp
 --- !u!4 &1342839176
 Transform:
   m_ObjectHideFlags: 0

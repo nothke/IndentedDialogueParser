@@ -7,9 +7,9 @@ using System.Linq;
 
 public class DialogueNode
 {
-    public string answer;
+    public string prompt;
     public string[] choices;
-    public DialogueNode[] links;
+    public int[] links;
 }
 
 
@@ -17,63 +17,79 @@ public class DialogueParser : MonoBehaviour
 {
     struct TabLine
     {
+        public bool isPrompt;
         public string text;
-        public int line;
+        public int lineIndex;
         public int parent;
         public int indent;
 
         public List<int> links;
 
-        public TabLine(string text, int line, int indent, int parent)
+        public TabLine(bool isPrompt, string text, int lineIndex, int indent, int parent)
         {
+            this.isPrompt = isPrompt;
             this.text = text;
-            this.line = line;
+            this.lineIndex = lineIndex;
             this.indent = indent;
             this.parent = parent;
 
             links = new List<int>();
         }
+
+        public List<TabLine> GetLinkedTabLines(List<TabLine> tabLines)
+        {
+            if (links.Count == 0) return null;
+
+            List<TabLine> outTabLines = new List<TabLine>();
+
+            for (int i = 0; i < links.Count; i++)
+                outTabLines.Add(tabLines[links[i]]);
+
+            return outTabLines;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} || Line Index: {1}, Indent: {2}, Parent: {3}, Links num: {4}", text, lineIndex, indent, parent, links.Count);
+        }
     }
 
     List<TabLine> tabLines = new List<TabLine>();
 
-    List<DialogueNode> nodes = new List<DialogueNode>();
+    Dictionary<int, DialogueNode> nodes = new Dictionary<int, DialogueNode>();
+    DialogueNode rootNode;
 
     public string fileName;
 
     public DialogueNode GetFirstNode()
     {
-        return nodes[0];
+        return rootNode;
     }
 
     public void Parse()
     {
         string[] lines = File.ReadAllLines(fileName);
 
-        List<string> diaLines = new List<string>();
-
-        //Dictionary<int, List<string>> tabbedDict = new Dictionary<int, List<string>>();
-
-        // isolate only dialogue lines
+        int li = 0; // line index
 
         for (int ln = 0; ln < lines.Length; ln++)
         {
             string line = lines[ln];
 
             int indent = 0;
-            int li = 0; // line index
 
             for (int ci = 0; ci < line.Length; ci++)
             {
-                if (line[ci] == '\t') indent++;
+                if (line[ci] == '\t') indent++; // count indent
                 else
                 {
-                    if (line[ci] == '-') // if line starts with - it's a dialogue line
-                    {
-                        li++; // increment index by one
+                    bool lineIsPrompt = line[ci] == '-';
+                    bool lineIsChoice = line[ci] == '*';
 
+                    if (lineIsPrompt || lineIsChoice)
+                    {
                         string text = line.Substring(ci + 1).Trim();
-                        TabLine tabLine = new TabLine(text, li, indent, 0);
+                        TabLine tabLine = new TabLine(lineIsPrompt, text, li, indent, 0);
 
                         if (indent != 0) // if no indent, it's root
                         {
@@ -83,7 +99,7 @@ public class DialogueParser : MonoBehaviour
                                 if (tabLines[i].indent == indent - 1)
                                 {
                                     // add a parent
-                                    tabLine.parent = tabLines[i].line;
+                                    tabLine.parent = tabLines[i].lineIndex;
 
                                     // add this as a child to a parent
                                     tabLines[i].links.Add(li);
@@ -94,6 +110,7 @@ public class DialogueParser : MonoBehaviour
                         }
 
                         tabLines.Add(tabLine);
+                        li++; // increment index by one
 
                         break;
                     }
@@ -101,25 +118,46 @@ public class DialogueParser : MonoBehaviour
             }
         }
 
-        // go through each tabline and make a node
+        for (int i = 0; i < tabLines.Count; i++)
+        {
+            Debug.Log(tabLines[i].ToString());
+        }
+
+        // Create all nodes as dictionary entries linked by 'line' number
         for (int tli = 0; tli < tabLines.Count; tli++)
         {
-            int ln = tabLines[tli].line;
+            if (tabLines[tli].isPrompt)
+            {
+                DialogueNode node = new DialogueNode();
+                node.prompt = tabLines[tli].text;
+                node.links = tabLines[tli].links.ToArray();
 
-            // find all that link to it
-            List<int> linkedLines = tabLines[tli].links;
+                int linkCount = tabLines[tli].links.Count;
 
-            List<TabLine> linkedTabLines = new List<TabLine>();
+                node.links = new int[linkCount];
+                node.choices = new string[linkCount];
 
-            // find all links by line
-            for (int ltli = 0; ltli < linkedLines.Count; ltli++)
-                linkedTabLines.Add(tabLines[linkedLines[ltli]]);
+                for (int i = 0; i < linkCount; i++)
+                {
+                    int tabLineIndex = tabLines[tli].links[i];
+                    node.links[i] = tabLineIndex + 1;
+                    node.choices[i] = tabLines[tabLineIndex].text;
+                }
 
-            string[] linkedTexts = linkedTabLines.Select(x => x.text).ToArray();
+                nodes.Add(tabLines[tli].lineIndex, node);
 
-            DialogueNode node = new DialogueNode();
-            node.choices = linkedTexts;
-            //node.links = linkedLinks;
+                if (tabLines[tli].indent == 0)
+                    rootNode = node;
+            }
         }
+
+        tabLines.Clear();
+        tabLines = null;
+    }
+
+    public DialogueNode GetNext(DialogueNode current, int choice)
+    {
+        Debug.Log("Fetching line " + current.links[choice]);
+        return nodes[current.links[choice]];
     }
 }
