@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
+using System.Text.RegularExpressions;
+
 using System.Linq;
 
 namespace IndentedDialogue
@@ -104,6 +106,7 @@ namespace IndentedDialogue
             for (int ln = 0; ln < lines.Length; ln++)
             {
                 string line = lines[ln];
+                line = RemoveComments(line);
 
                 int indent = 0;
 
@@ -216,6 +219,11 @@ namespace IndentedDialogue
                     }
                 }
             }
+        }
+
+        string RemoveComments(string str, string delimiter = "//")
+        {
+            return Regex.Replace(str, delimiter + ".+", string.Empty);
         }
 
         void Error(string message)

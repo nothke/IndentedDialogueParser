@@ -1,8 +1,8 @@
 # TEST 1
 - Hi there!
-	* Hi
+	* Hi // This is a comment
 		- Nice day, isn't it?
-			* Oh yeah, it is
+			* Oh yeah, it is // This is a comment, too
 				- What you up to?
 					* Just strolling around
 						- Ok, well, it was nice to meet you!
@@ -13,9 +13,10 @@
 						- No, I'm sorry, I don't know any
 							* Well, that's ok
 								- Sorry, couldn't help. See you around..
+							// Maybe add more here, it's kind of stupid without any choice
 			* It could be better
 				- True, but you don't need to be such a pessimist
-					* Once a pessimist, always a pessimist
+					* Once a pessimist, always a pessimist // Lol, this is so stupid, I just didn't have a better idea
 						- As you wish
 					* Yeah, sorry, I just wish it was a bit nicer
 						- Ok..
@@ -23,7 +24,13 @@
 
 # TEST 2
 - Hi there again
-	* Hi, bloper bloper
+	* Hi, bloper bloper // ???
 		- You are not the first person as the last one?
 			* What?
 				- Oh nothing, get lost
+			* I am not!
+				- Okkk... Don't raise you voice!!!
+					* I AM NOT!!
+						- Yes, you are..
+							* AAAAAAAA!!!
+								- Now it's getting ridiculous, goodbye
