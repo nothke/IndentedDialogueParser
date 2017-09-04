@@ -35,10 +35,17 @@ When writing dialogues for games, I would often write them first into one text f
 - Syntax highlighter for sublime
 
 ## Syntax
-```// This is a comment
-# THIS IS A TREE  // The name of this dialogue tree, preceeded by '#', you can get it with trees["THIS IS A TREE"]
+```
+// This is a comment
+# THIS IS A TREE  // The name of this dialogue tree, preceeded by '#'. Also, inline comment :)
 - Hi! // A prompt, preceeded by '-', this is a root node as it is the first
   * Oh, hi! // A choice is preceeded by '*', prompts and choices cannot be on the same indentation!
   * Well, hello!! // Another choice
     - Well, well, well... Hello! // The answer to the second choice..
-    // You can see other examples in the project```
+    // You can see other examples in the project
+
+# TREE 2 // Another tree
+- You again!?
+ * Yeah, me again!
+  - Move along..
+ ```
