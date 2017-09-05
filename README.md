@@ -1,7 +1,5 @@
 # Indented Dialogue
 
-## THIS LIBRARY IS STILL WIP! I RECOMMEND NOT USING IT YET!
-
 ### Motivation
 
 When writing dialogues for games, I would often write them first into one text file, and then assemble them in an 'off the shelf' flowgraph-style system such as [Yarn](https://github.com/InfiniteAmmoInc/Yarn). I do that because I personally find text editing much quicker and reliable, and often feel I spend more time arranging the flowcharts then actually writing the text. Just making new nodes and connecting them can cause my brain to get distracted for a moment and I forget what I wanted to write. But then I realized, hey, why don't I just write them once and have them parsed directly from the text file?!  So, here is my solution!
@@ -31,7 +29,7 @@ When writing dialogues for games, I would often write them first into one text f
 ## How to write
 - You can write __comments__ similarily to C-like languages, preceeding with ```//```, they will simply be discarded by the parser. There are no block comments.
 
-- You initiate your dialogue with a __tree identifier__, preceeded with a '#', eg. ```# BOB_KITCHEN``` this is then used in game to load a dialogue, using ```dialogueForest["BOB_KITCHEN"]```. Note that you don't need to have capital letters, or underscores, you can also use spaces, this is just a personal preference, but keep in mind that all white space *around* the identifier name will be trimmed, so ```#BOB KITCHEN``` will be parsed the same as ```# BOB KITCHEN   ```.
+- You initiate your dialogue with a __tree identifier__, preceeded with a '#', eg. ```# BOB_KITCHEN``` this is then used in game to start that dialogue (using ```dialogueForest["BOB_KITCHEN"]```, see [Accessing nodes](#accessing-nodes). Note that you don't need to have capital letters, or underscores, you can also use spaces, this is just a personal preference, but keep in mind that all white space *around* the identifier name will be trimmed, so ```#BOB KITCHEN``` will be parsed the same as ```# BOB KITCHEN   ```.
 
 - Now comes your tree, a __prompt__ is preceeded with a '-', while a __choice__ is preceeded with a '*'. You must start with a prompt, and then write a choice in a next indented line. Then, you need to alternate between the 2, having prompts and choices on a single line is not allowed.
 
@@ -66,6 +64,28 @@ When writing dialogues for games, I would often write them first into one text f
 				* If I could also ask.. [ASK] // This will also jump back to the 'ASK' line
 ```
 
+### Caveats, warnings and notes
+- "Indentation" means "tab", spaces are not considered indentation;
+- You must always alternate between prompt - choice - prompt - choice ..
+	- If you want to have 2 prompts, you can add a single 'continue' choice in between, like:
+```
+- OMG!
+	* What happened!?
+		- There..
+			* ... // using three dots as a 'continue' statement
+				- ..is..
+					* ...
+						- ..no..
+							* ...
+								- ..COFFEEE!!!!
+									* oh damn..
+```
+- Having prompts and choices mixed in a single indentation is also not allowed;
+- The first line in a dialogue MUST have no indentation (this will be allowed in the future update, see [TODO](#todo));
+- You MUST not have 2 or more indentations more between following lines. Parsing requires this;
+- Multiline text editing is currently not supported, but you can use '\n' character for a new line;
+- Make sure you don't have empty sections between or after tree identifiers. This will return a "Tree is defined, but no dialogue found" error and parsing will fail.
+
 ## Parsing in Unity
 Dialogues are parsed from text files into a DialogueForest object. This is done as simply as calling:
 ```
@@ -75,7 +95,7 @@ The best is to look into examples in the project like the DialogueManager.cs and
 
 ## Accessing nodes
 - As mentioned, after parsing, the dialogue structure is stored inside a DialogueForest. 
-- The DialogueForest contains one or more DialogueTrees, which can be accessed with eg. ```dialogueForest["BOB KITCHEN"]```, where ```BOB KITCHEN``` is the tree identifier (see in *How to write* section).
+- The DialogueForest contains one or more DialogueTrees, which can be accessed with eg. ```dialogueForest["BOB KITCHEN"]```, where ```BOB KITCHEN``` is the tree identifier (see in [How to write](#how-to-write)).
 - A DialogueTree contains DialogueNodes, where each node is a prompt with choices and links to next prompts.
 - To get the first node of the dialogue, call ```dialogueTree.GetFirstNode()```
 - To get the next node, call ```dialogueTree.GetNext(currentNode, choiceIndex)```
@@ -89,25 +109,7 @@ Classes using the system: DialogueNode, DialogueTree and DialogueForest, are all
 - If you wish to save dialogues into an inaccesible external file, you can use binary serialization built-into a DialogueForest class. Call ```DialogueForest.SerializeIntoBinary("path/dialogue.dat")``` to save it, and ```DialogueForest.DeserializeFromBinary("path/dialogue.dat")``` to load it. Now you can access the dialogues by calling ```dialogueForest["NAME OF YOUR TREE"]``` as explained in the Accessing nodes part. (Note that path, filename and extension can be any name you wish)
 
 ## TODO:
-- Currenlty only prompt - choice - prompt - choice form is supported, you can't have 2 prompts in a row. The way around it is to use a single 'continue' choice, then you will proceed to the ne.
-- Multiline text editing is currently not supported, use '\n' character for a new line
-- Reusing parts, links to trees
-- Tags for adding features such as requirement checking, randomization, or events. They currently need to be implemented by the user
+- Multiline text editing
+- Reusing choices, by linking them in similar way to choice>prompt link tags
+- Conditions, randomization, and events. They currently need to be implemented by the user
 - Syntax highlighter for sublime
-
-
-## Syntax
-```
-// This is a comment
-# THIS IS A TREE  // The name of this dialogue tree, preceeded by '#'. Also, inline comment :)
-- Hi! // A prompt, preceeded by '-', this is a root node as it is the first
-  * Oh, hi! // A choice is preceeded by '*', prompts and choices cannot be on the same indentation!
-  * Well, hello!! // Another choice
-    - Well, well, well... Hello! // The answer to the second choice..
-    // You can see other examples in the project
-
-# TREE 2 // Another tree
-- You again!?
- * Yeah, me again!
-  - Move along..
- ```
