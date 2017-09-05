@@ -18,6 +18,11 @@ namespace IndentedDialogue
         [System.NonSerialized]
         Dictionary<string, DialogueTree> treeDict = new Dictionary<string, DialogueTree>();
 
+        public DialogueTree this[string treeId]
+        {
+            get { return treeDict[treeId]; }
+        }
+
         public void SerializeIntoBinary(string fileName)
         {
             treesArray = treeDict.Values.ToArray();
