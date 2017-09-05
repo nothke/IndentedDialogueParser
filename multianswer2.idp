@@ -3,12 +3,12 @@
 	* Hi // This is a comment
 		- Nice day, isn't it?
 			* Oh yeah, it is // This is a comment, too
-				- What you up to?
+				- [OH SHIT] What you up to?
 					* Just strolling around
 						- Ok, well, it was nice to meet you!
 					* Looking for blueberies
 						- Oh yeah, there's quite a few, right over there, next to that tree
-							* Oh thanks a lot!
+							* Oh thanks a lot! [OH SHIT]
 					* Looking for a job, do you know any?
 						- No, I'm sorry, I don't know any
 							* Well, that's ok
@@ -34,3 +34,30 @@
 						- Yes, you are..
 							* AAAAAAAA!!!
 								- Now it's getting ridiculous, goodbye
+
+
+# HAVE SOME CHOICE
+- Oh, it's you again!
+	* Hehe, yeah, it's me..
+	* Umm... Are you sure you saw me before?
+	* Yeah.. I just wanted to ask you a question
+		- Sure, ask away..
+			* Where can I buy bananas?
+			* Where can I find blueberries?
+	* YES! IT'S ME!! Now, prepare to DIE!!
+
+# LOOP TEST
+//Tags in square brackets can jump (goto) another line
+- Hi!
+	* Nice shirt
+		- Thanks
+	* Can I ask you something
+		- [ASK] Sure, go ahead // This is now a line tagged as 'ASK'
+			* Where can I find the closest toilet?
+				- It's on the left!
+					* Thanks!
+					* If I could also ask.. [ASK] // This will jump to the 'ASK' line
+			* Where is the closest ATM?
+				- It's forward, right next to the bank
+					* Thanks!
+					* If I could also ask.. [ASK]
