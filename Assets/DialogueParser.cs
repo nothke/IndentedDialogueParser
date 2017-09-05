@@ -55,7 +55,7 @@ namespace IndentedDialogue
             foreach (var tree in treesArray)
                 tree.SerializeFromDict();
 
-            Debug.Log("TreeDict size: " + treeDict.Count + ", array size: " + treesArray.Length);
+            //Debug.Log("TreeDict size: " + treeDict.Count + ", array size: " + treesArray.Length);
 
         }
 
@@ -309,9 +309,10 @@ namespace IndentedDialogue
             tabLines.Clear();
             tags.Clear();
 
+            /*// Debug tabLinesDict
             Debug.Log("TABLINING COMPLETE: " + tabLinesDict.Count);
 
-            // Debug tabLinesDict
+            
             foreach (var pair in tabLinesDict)
             {
                 var debugTabLines = pair.Value;
@@ -323,10 +324,11 @@ namespace IndentedDialogue
                     Debug.Log("TABLINER: " + pair.Key + " || " + tabLine.ToString());
                 }
             }
+            */
 
             DialogueTree currentTree = null;
 
-            Debug.Log("Num of trees: " + tabLinesDict.Count);
+            //Debug.Log("Num of trees: " + tabLinesDict.Count);
 
             foreach (var pair in tabLinesDict)
             {
@@ -387,11 +389,11 @@ namespace IndentedDialogue
                 return;
             }
 
-            Debug.Log("Found tags: " + tags.Count);
+            //Debug.Log("Found tags: " + tags.Count);
 
             foreach (var tab in tablines)
             {
-                Debug.Log("LINKER: " + tab.text);
+                //Debug.Log("LINKER: " + tab.text);
 
                 if (tab.isPrompt) continue;
 
