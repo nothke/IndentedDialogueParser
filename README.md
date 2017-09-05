@@ -7,11 +7,11 @@ When writing dialogues for games, I would often write them first into one text f
 ## Advantages
 - Write as you think! Write one conversation stream quickly, then add alternatives later..
 
-![alt text](https://i.imgur.com/EoHmodH.gif "Write as you think")
+![alt text](https://i.imgur.com/lqrGSMC.gif "Write as you think")
 
 - ..Or, write with choices in mind first, if you wish..
 
-![alt text](https://i.imgur.com/Dlja0EQ.gif "Write as you choose")
+![alt text](https://i.imgur.com/KZd7nkl.gif "Write as you choose")
 
 - Easily editable. Need to insert a branch? Just press enter and navigate to the right indentation.
 - Clear and easily readable.
