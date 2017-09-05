@@ -43,11 +43,8 @@ namespace IndentedDialogue
         public int[] links;
     }
 
-
-    public class DialogueParser : MonoBehaviour
+    public static class DialogueParser
     {
-        public Dictionary<string, DialogueTree> trees = new Dictionary<string, DialogueTree>();
-
         struct TabLine
         {
             public bool isPrompt; // if false, it's a choice
@@ -92,12 +89,12 @@ namespace IndentedDialogue
             }
         }
 
-        public string fileName;
+        static string tagRegexPattern = Regex.Escape("[") + "(.*?)]";
 
-        string tagRegexPattern = Regex.Escape("[") + "(.*?)]";
-
-        public void Parse()
+        public static Dictionary<string, DialogueTree> ParseIntoTreeDict(string fileName)
         {
+            Dictionary<string, DialogueTree> treeDict = new Dictionary<string, DialogueTree>();
+
             string[] lines = File.ReadAllLines(fileName);
 
             int li = 0; // line index
@@ -106,6 +103,8 @@ namespace IndentedDialogue
             Dictionary<string, int> tags = new Dictionary<string, int>();
 
             List<TabLine> tabLines = new List<TabLine>();
+
+            string prevTreeName = string.Empty;
 
             for (int ln = 0; ln < lines.Length; ln++)
             {
@@ -132,17 +131,22 @@ namespace IndentedDialogue
                                 // RUN THE 'SECOND PASS', link everything
                                 Link(ref tabLines, ref tags);
 
+                                tabLinesDict[prevTreeName] = new List<TabLine>(tabLines);
+
                                 tabLines.Clear();
                                 tags.Clear();
+
                             }
+
+                            prevTreeName = name;
 
                             if (tabLinesDict.ContainsKey(name))
                             {
                                 Error(string.Format("Found more than one trees called '{0}', this is not allowed", name));
-                                return;
+                                return null;
                             }
 
-                            tabLinesDict.Add(name, tabLines);
+                            tabLinesDict.Add(name, null); // We add a null
                             li = 0;
 
                             break;
@@ -202,14 +206,23 @@ namespace IndentedDialogue
 
             Link(ref tabLines, ref tags);
 
-            // Debug tabLines
+            tabLinesDict[prevTreeName] = new List<TabLine>(tabLines);
+
+            tabLines.Clear();
+            tags.Clear();
+
+            Debug.Log("TABLINING COMPLETE: " + tabLinesDict.Count);
+
+            // Debug tabLinesDict
             foreach (var pair in tabLinesDict)
             {
                 var debugTabLines = pair.Value;
 
+                Debug.Log("TABLINER, size of tablines for " + pair.Key + " is " + debugTabLines.Count);
+
                 foreach (var tabLine in debugTabLines)
                 {
-                    Debug.Log(pair.Key + " || " + tabLine.ToString());
+                    Debug.Log("TABLINER: " + pair.Key + " || " + tabLine.ToString());
                 }
             }
 
@@ -219,15 +232,14 @@ namespace IndentedDialogue
 
             foreach (var pair in tabLinesDict)
             {
-                tabLines = pair.Value;
+                List<TabLine> tabs = pair.Value;
 
                 currentTree = new DialogueTree();
-                trees.Add(pair.Key, currentTree);
 
                 // Create all nodes as dictionary entries linked by 'line' number
-                for (int tli = 0; tli < tabLines.Count; tli++)
+                for (int tli = 0; tli < tabs.Count; tli++)
                 {
-                    TabLine tab = tabLines[tli];
+                    TabLine tab = tabs[tli];
 
                     if (tab.isPrompt)
                     {
@@ -244,24 +256,30 @@ namespace IndentedDialogue
                         {
                             int choiceIndex = tab.links[i];
 
-                            TabLine choiceTabline = tabLines[choiceIndex];
+                            TabLine choiceTabline = tabs[choiceIndex];
 
                             node.links[i] = choiceTabline.links[0];
 
-                            Debug.Assert(choiceIndex < tabLines.Count, "tablineIndex is out of range");
+                            Debug.Assert(choiceIndex < tabs.Count, "tablineIndex is out of range");
                             node.choices[i] = choiceTabline.text;
                         }
 
-                        currentTree.nodes.Add(tabLines[tli].lineIndex, node);
+                        currentTree.nodes.Add(tabs[tli].lineIndex, node);
 
-                        if (tabLines[tli].indent == 0)
+                        if (tabs[tli].indent == 0)
                             currentTree.rootNode = node;
                     }
                 }
+
+                treeDict.Add(pair.Key, currentTree);
             }
+
+            Debug.Log("Finished parsing. Found " + treeDict.Count + " trees in " + fileName);
+
+            return treeDict;
         }
 
-        void Link(ref List<TabLine> tablines, ref Dictionary<string, int> tags)
+        static void Link(ref List<TabLine> tablines, ref Dictionary<string, int> tags)
         {
             if (tablines.Count == 0)
             {
@@ -273,6 +291,8 @@ namespace IndentedDialogue
 
             foreach (var tab in tablines)
             {
+                Debug.Log("LINKER: " + tab.text);
+
                 if (tab.isPrompt) continue;
 
                 // Add a 'reference to the choice' to parent
@@ -290,16 +310,12 @@ namespace IndentedDialogue
             }
         }
 
-        void AddTags(ref List<TabLine> tablines, ref Dictionary<string, int> tags)
-        {
-        }
-
-        string RemoveComments(string str, string delimiter = "//")
+        static string RemoveComments(string str, string delimiter = "//")
         {
             return Regex.Replace(str, delimiter + ".+", string.Empty);
         }
 
-        void Error(string message)
+        static void Error(string message)
         {
             Debug.LogError("IDP: Parsing unsuccessful: " + message);
         }

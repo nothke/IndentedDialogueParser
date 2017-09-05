@@ -5,29 +5,43 @@ using IndentedDialogue;
 
 public class DialogueParserTestGUI : MonoBehaviour
 {
-    DialogueParser _dialogueParser;
-    DialogueParser dialogueParser { get { if (!_dialogueParser) _dialogueParser = GetComponent<DialogueParser>(); return _dialogueParser; } }
+    public string fileName;
+    public string treeName = "TEST 1";
 
-    void Start()
-    {
-        dialogueParser.Parse();
-        ResetRoot();
-    }
+    Dictionary<string, DialogueTree> trees;
+
+    DialogueNode currentNode;
 
     Rect rect = new Rect(100, 100, 400, 400);
 
-    public const string TREE_NAME = "TEST 2";
+    void Start()
+    {
+        trees = DialogueParser.ParseIntoTreeDict(fileName);
+
+        DebugTrees();
+
+        ResetRoot();
+    }
+
+    void DebugTrees()
+    {
+        Debug.Log("GUI DEBUG! There are " + trees.Count + " trees");
+
+        foreach (var tree in trees)
+        {
+            Debug.Log(tree.Key + "; " + tree.Value.rootNode.prompt);
+            //Debug.Log(tree.Key + "; " + tree.Value.nodes[0].prompt + "; " + tree.Value.rootNode.prompt);
+        }
+    }
 
     private void OnGUI()
     {
         GUI.Window(0, rect, Window, "Dialogue");
     }
 
-    DialogueNode currentNode;
-
     void ResetRoot()
     {
-        currentNode = dialogueParser.trees[TREE_NAME].GetFirstNode();
+        currentNode = trees[treeName].GetFirstNode();
     }
 
     void Window(int id)
@@ -60,8 +74,7 @@ public class DialogueParserTestGUI : MonoBehaviour
         {
             if (GUILayout.Button(currentNode.choices[i]))
             {
-                currentNode = dialogueParser.trees[TREE_NAME].GetNext(currentNode, i);
-                //currentNode = dialogueParser.GetNext(currentNode, i);
+                currentNode = trees[treeName].GetNext(currentNode, i);
                 break;
             }
         }
