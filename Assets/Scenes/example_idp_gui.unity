@@ -316,5 +316,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7052cf1dd6b871942b21f56ed83ed50f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileName: multianswer2.idp
+  fileName: DialogueData\example.idp
   treeName: TEST 1
