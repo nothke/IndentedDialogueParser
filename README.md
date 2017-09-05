@@ -1,5 +1,7 @@
 # Indented Dialogue
 
+A simple, text-based dialogue tree system
+
 ### Motivation
 
 When writing dialogues for games, I would often write them first into one text file, and then assemble them in an 'off the shelf' flowgraph-style system such as [Yarn](https://github.com/InfiniteAmmoInc/Yarn). I do that because I personally find text editing much quicker and reliable, and often feel I spend more time arranging the flowcharts then actually writing the text. Just making new nodes and connecting them can cause my brain to get distracted for a moment and I forget what I wanted to write. But then I realized, hey, why don't I just write them once and have them parsed directly from the text file?!  So, here is my solution!
