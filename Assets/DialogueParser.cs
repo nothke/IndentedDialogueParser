@@ -1,14 +1,81 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
-
 using System.Text.RegularExpressions;
-
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+
+using UnityEngine;
 
 namespace IndentedDialogue
 {
+    [System.Serializable]
+    public class DialogueForest
+    {
+        public string name;
+        [SerializeField]
+        DialogueTree[] treesArray;
+        [System.NonSerialized]
+        Dictionary<string, DialogueTree> treeDict = new Dictionary<string, DialogueTree>();
+
+        public void SerializeIntoBinary(string fileName)
+        {
+            treesArray = treeDict.Values.ToArray();
+
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Create(fileName);
+            bf.Serialize(file, this);
+            file.Close();
+        }
+
+        public static DialogueForest DeserializeFromBinary(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                Debug.LogError("Deserialization attempt failed. File " + fileName + " doesn't exist");
+                return null;
+            }
+
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(fileName, FileMode.Open);
+            DialogueForest forest = (DialogueForest)bf.Deserialize(file);
+            file.Close();
+
+            forest.PopulateDict();
+
+            return forest;
+        }
+
+        public void ParseFromFile(string fileName)
+        {
+            treeDict = DialogueParser.ParseIntoTreeDict(fileName);
+
+            treesArray = treeDict.Values.ToArray();
+
+            foreach (var tree in treesArray)
+                tree.SerializeFromDict();
+
+            Debug.Log("TreeDict size: " + treeDict.Count + ", array size: " + treesArray.Length);
+
+        }
+
+        public void CombineWith(DialogueForest forest)
+        {
+            var parsedDict = forest.treeDict;
+            parsedDict.ToList().ForEach(x => treeDict.Add(x.Key, x.Value));
+        }
+
+        void PopulateDict()
+        {
+            treeDict = new Dictionary<string, DialogueTree>();
+
+            foreach (var tree in treesArray)
+            {
+                treeDict.Add(tree.name, tree);
+            }
+        }
+    }
+
     [System.Serializable]
     public class DialogueTree
     {
@@ -303,6 +370,7 @@ namespace IndentedDialogue
                     }
                 }
 
+                currentTree.name = pair.Key;
                 treeDict.Add(pair.Key, currentTree);
             }
 
