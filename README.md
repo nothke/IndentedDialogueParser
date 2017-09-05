@@ -119,3 +119,5 @@ Classes using the system: DialogueNode, DialogueTree and DialogueForest, are all
 - Reusing choices, by linking them in similar way to choice>prompt link tags
 - Conditions, randomization, and events. They currently need to be implemented by the user
 - Syntax highlighter for sublime
+- Improve parsing error checks
+- Simplify readme
