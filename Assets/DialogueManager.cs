@@ -1,7 +1,7 @@
 ﻿///
 /// Combines all trees from a folder
 /// 
-/// Add this component into the scene, at it will parse all files at start
+/// Add this component into the scene, it will parse all files at start
 /// 
 /// You can get any dialogue tree by simply querying by tree definition,
 /// eg. DialogueManager.Trees[DIALOGUE 1]
@@ -10,10 +10,7 @@
 /// To get the next node, get DialogueManager.Trees[DIALOGUE 1].GetNext(*node*, *choiceNumber*);
 /// 
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 using System.IO;
 using IndentedDialogue;
@@ -23,9 +20,9 @@ public class DialogueManager : MonoBehaviour
     public static DialogueManager instance;
     void Awake() { instance = this; }
 
-    Dictionary<string, DialogueTree> treeDict = new Dictionary<string, DialogueTree>();
+    DialogueForest forest;
 
-    public static Dictionary<string, DialogueTree> Trees { get { return instance.treeDict; } }
+    public static DialogueForest Trees { get { return instance.forest; } }
 
     public string folderName = "DialogueData";
 
@@ -35,8 +32,9 @@ public class DialogueManager : MonoBehaviour
 
         foreach (var fileName in fileNames)
         {
-            var parsedDict = DialogueParser.ParseIntoTreeDict(fileName);
-            parsedDict.ToList().ForEach(x => treeDict.Add(x.Key, x.Value));
+            DialogueForest f = new DialogueForest();
+            f.ParseFromFile(fileName);
+            forest.CombineWith(f);
         }
     }
 }
