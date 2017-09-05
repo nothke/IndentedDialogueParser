@@ -8,7 +8,7 @@ public class DialogueParserTestGUI : MonoBehaviour
     public string fileName;
     public string treeName = "TEST 1";
 
-    Dictionary<string, DialogueTree> trees;
+    DialogueForest forest;
 
     DialogueNode currentNode;
 
@@ -16,22 +16,10 @@ public class DialogueParserTestGUI : MonoBehaviour
 
     void Start()
     {
-        trees = DialogueParser.ParseIntoTreeDict(fileName);
-
-        DebugTrees();
+        forest = new DialogueForest();
+        forest.ParseFromFile(fileName);
 
         ResetRoot();
-    }
-
-    void DebugTrees()
-    {
-        Debug.Log("GUI DEBUG! There are " + trees.Count + " trees");
-
-        foreach (var tree in trees)
-        {
-            Debug.Log(tree.Key + "; " + tree.Value.rootNode.prompt);
-            //Debug.Log(tree.Key + "; " + tree.Value.nodes[0].prompt + "; " + tree.Value.rootNode.prompt);
-        }
     }
 
     private void OnGUI()
@@ -41,7 +29,7 @@ public class DialogueParserTestGUI : MonoBehaviour
 
     void ResetRoot()
     {
-        currentNode = trees[treeName].GetFirstNode();
+        currentNode = forest[treeName].GetFirstNode();
     }
 
     void Window(int id)
@@ -54,7 +42,6 @@ public class DialogueParserTestGUI : MonoBehaviour
 
             return;
         }
-
 
         GUILayout.Label(currentNode.prompt);
 
@@ -74,7 +61,7 @@ public class DialogueParserTestGUI : MonoBehaviour
         {
             if (GUILayout.Button(currentNode.choices[i]))
             {
-                currentNode = trees[treeName].GetNext(currentNode, i);
+                currentNode = forest[treeName].GetNext(currentNode, i);
                 break;
             }
         }
