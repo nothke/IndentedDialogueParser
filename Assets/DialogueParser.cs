@@ -9,10 +9,17 @@ using System.Linq;
 
 namespace IndentedDialogue
 {
+    [System.Serializable]
     public class DialogueTree
     {
+        public string name;
+
         public DialogueNode rootNode;
-        public Dictionary<int, DialogueNode> nodes = new Dictionary<int, DialogueNode>();
+
+        [SerializeField]
+        DialogueNode[] nodesArray;
+
+        Dictionary<int, DialogueNode> nodes = new Dictionary<int, DialogueNode>();
 
         /// <summary>
         /// Gets the next dialogue node. Returns null when it's the end.
@@ -34,11 +41,35 @@ namespace IndentedDialogue
         {
             return rootNode;
         }
+
+        public void AddToDict(int nodeIndex, DialogueNode node)
+        {
+            nodes.Add(nodeIndex, node);
+        }
+
+        public void SerializeFromDict()
+        {
+            nodesArray = nodes.Values.ToArray();
+        }
+
+        public void DeserializeToDict()
+        {
+            if (nodes == null)
+                nodes = new Dictionary<int, DialogueNode>();
+            else nodes.Clear();
+
+            for (int i = 0; i < nodesArray.Length; i++)
+            {
+                nodes.Add(nodesArray[i].index, nodesArray[i]);
+            }
+        }
     }
 
+    [System.Serializable]
     public class DialogueNode
     {
         public string prompt;
+        public int index;
         public string[] choices;
         public int[] links;
     }
@@ -264,7 +295,8 @@ namespace IndentedDialogue
                             node.choices[i] = choiceTabline.text;
                         }
 
-                        currentTree.nodes.Add(tabs[tli].lineIndex, node);
+                        node.index = tabs[tli].lineIndex;
+                        currentTree.AddToDict(tabs[tli].lineIndex, node);
 
                         if (tabs[tli].indent == 0)
                             currentTree.rootNode = node;
