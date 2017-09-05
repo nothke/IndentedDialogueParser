@@ -23,7 +23,7 @@ When writing dialogues for games, I would often write them first into one text f
 ## Disadantages:
 - Not so pretty as some flowgraphs .. *Looking at [yarn](https://github.com/InfiniteAmmoInc/Yarn)* (but hey, text editors can look nice too!)
 - If the trees are gonna be hyuuuge, sometimes it's hard to see what choices are on the same indentation. However, making indentation lines visible or collapsing regions in text editors like sublime or VS code can greatly help with this problem.
-- Currently missing is the stuff in the TODO list
+- Currently missing are the stuff in the [TODO](#todo) list
 
 
 ## How to write
@@ -34,6 +34,7 @@ When writing dialogues for games, I would often write them first into one text f
 - Now comes your tree, a __prompt__ is preceeded with a '-', while a __choice__ is preceeded with a '*'. You must start with a prompt, and then write a choice in a next indented line. Then, you need to alternate between the 2, having prompts and choices on a single line is not allowed.
 
 ```
+# THIS IS AN IDENTIFIER
 - Hi! This is a prompt
 	* Hey, this is a choice
 		- Oh, really, you call that a choice? Well, here's another prompt!
@@ -42,6 +43,7 @@ When writing dialogues for games, I would often write them first into one text f
 - To add more choices, write them in the same indentation as other choices
 
 ```
+# ADDING CHOICES
 - Hi! This is a prompt
 	* Hey, this is a first choice
 		- Ok, well, here's another prompt!
@@ -69,6 +71,7 @@ When writing dialogues for games, I would often write them first into one text f
 - You must always alternate between prompt - choice - prompt - choice ..
 	- If you want to have 2 prompts, you can add a single 'continue' choice in between, like:
 ```
+# EMPHASIS EXAMPLE
 - OMG!
 	* What happened!?
 		- There..
@@ -85,6 +88,7 @@ When writing dialogues for games, I would often write them first into one text f
 - You MUST not have 2 or more indentations more between following lines. Parsing requires this;
 - Multiline text editing is currently not supported, but you can use '\n' character for a new line;
 - Make sure you don't have empty sections between or after tree identifiers. This will return a "Tree is defined, but no dialogue found" error and parsing will fail.
+- Files without tree identifiers will not be parsed
 
 ## Parsing in Unity
 Dialogues are parsed from text files into a DialogueForest object. This is done as simply as calling:
@@ -104,9 +108,9 @@ You can see these in use in the DialogueParserGUI.cs script
 
 ## Serialization
 Classes using the system: DialogueNode, DialogueTree and DialogueForest, are all serializable, therefore there are multiple ways you can save the dialogues:
-- The first obvious way is to just keep them in the text form, and parse them when you need it at runtime, eg. at start of the game. This will incur some cost of parsing the text, especially if there is a lot of dialogues. Parsing process is not very optimized, it uses a bunch of regex matches and linq operations, so you might have freezes when loading and possible GC spikes. Also, more importantly, this also of course means that anyone can view the dialogues on the system, and worse, anyone can modify them, potentially breaking the game if parsing fails. This mode is however very useful for production/debugging, eg. in the case where the game is built, but a writer can modify dialogues independently. But this method should NEVER be used for release.
-- The second way is to parse the files and save them into a public (serializable) DialogueForest field in one of the components in a scene. Since they are saved as scene data, they will be built together with the game, and therefore inaccessible to the player.
-- If you wish to save dialogues into an inaccesible external file, you can use binary serialization built-into a DialogueForest class. Call ```DialogueForest.SerializeIntoBinary("path/dialogue.dat")``` to save it, and ```DialogueForest.DeserializeFromBinary("path/dialogue.dat")``` to load it. Now you can access the dialogues by calling ```dialogueForest["NAME OF YOUR TREE"]``` as explained in the Accessing nodes part. (Note that path, filename and extension can be any name you wish)
+- The first obvious way is to just keep them in the **text form, and parse them when you need them** at runtime, eg. at start of the game. This will incur some cost of parsing the text, especially if there is a lot of dialogues. Parsing process is not very optimized, it uses a bunch of regex matches and linq operations, so you might have freezes when loading and possible GC spikes. Also, more importantly, this also of course means that anyone can view the dialogues on the system, and worse, anyone can modify them, potentially breaking the game if parsing fails. This mode is however very useful for production/debugging, eg. in the case where the game is built, but a writer can modify dialogues independently. But this method should NEVER be used for release.
+- The second way is to parse the files and **save them into a serialized DialogueForest field** (public field or tagged with [SerializeField]) in one of the components in a scene. Since they are saved as scene data, they will be built together with the game, and therefore inaccessible to the player.
+- If you wish to save dialogues into a non-human-readable external file, you can use **binary serialization built-into a DialogueForest class**. Call ```DialogueForest.SerializeIntoBinary("path/dialogue.dat")``` to save it, and ```DialogueForest.DeserializeFromBinary("path/dialogue.dat")``` to load it. Now you can access the dialogues by calling ```dialogueForest["NAME OF YOUR TREE"]``` as explained in [Accessing nodes](#accessing-nodes]. (Note that path, filename and extension can be any name you wish)
 
 ## TODO:
 - Multiline text editing
