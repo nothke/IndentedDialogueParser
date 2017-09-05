@@ -214,8 +214,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8525e5f7c6186a0438eacf3e079dbc8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idpFilePath: multianswer2.idp
-  binaryFilePath: dialogues.dat
+  idpFilePath: DialogueData\example.idp
+  binaryFilePath: DialogueData\dialogues.dat
   forest:
     name: 
     treesArray: []
